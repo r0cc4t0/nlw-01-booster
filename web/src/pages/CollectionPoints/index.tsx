@@ -1,11 +1,25 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { FiArrowLeft } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import api from '../../services/api';
 import './styles.css';
 import logo from '../../assets/logo.svg';
 
+interface Item {
+  id: number;
+  title: string;
+  image: string;
+};
+
 const CollectionPoints = () => {
+  const [items, setItems] = useState<Item[]>([]);
+
+  useEffect(() => {
+    api.get('items').then(response => {
+      setItems(response.data);
+    });
+  }, []);
 
   return (
     <div id="page-collection-point">
@@ -85,30 +99,12 @@ const CollectionPoints = () => {
           </header>
 
           <ul className="items-grid">
-            <li>
-              <img src="http://localhost:3333/uploads/lampadas.svg" alt="Lâmpadas" />
-              <span>Lâmpadas</span>
-            </li>
-            <li>
-              <img src="http://localhost:3333/uploads/baterias.svg" alt="Pilhas e Baterias" />
-              <span>Pilhas e Baterias</span>
-            </li>
-            <li>
-              <img src="http://localhost:3333/uploads/papeis-papelao.svg" alt="Papéis e Papelão" />
-              <span>Papéis e Papelão</span>
-            </li>
-            <li>
-              <img src="http://localhost:3333/uploads/eletronicos.svg" alt="Resíduos Eletrônicos" />
-              <span>Resíduos Eletrônicos</span>
-            </li>
-            <li>
-              <img src="http://localhost:3333/uploads/organicos.svg" alt="Resíduos Orgânicos" />
-              <span>Resíduos Orgânicos</span>
-            </li>
-            <li>
-              <img src="http://localhost:3333/uploads/oleo.svg" alt="Óleo de Cozinha" />
-              <span>Óleo de Cozinha</span>
-            </li>
+            {items.map(item => (
+              <li key={item.id}>
+                <img src={item.image} alt={item.title} />
+                <span>{item.title}</span>
+              </li>
+            ))}
           </ul>
         </fieldset>
 
