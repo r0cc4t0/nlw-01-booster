@@ -1,7 +1,8 @@
 import React, { useEffect, useState, ChangeEvent } from 'react';
 import { FiArrowLeft } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
+import { LeafletMouseEvent } from 'leaflet';
 import axios from 'axios';
 import api from '../../services/api';
 import './styles.css';
@@ -27,6 +28,16 @@ const CollectionPoints = () => {
   const [cities, setCities] = useState<string[]>([]);
   const [selectedState, setSelectedState] = useState('0');
   const [selectedCity, setSelectedCity] = useState('0');
+  const [initialPosition, setInitialPosition] = useState<[number, number]>([0, 0]);
+  const [selectedPosition, setSelectedPosition] = useState<[number, number]>([0, 0]);
+
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition(position => {
+      const { latitude, longitude } = position.coords;
+      setInitialPosition([latitude, longitude]);
+      console.log([latitude, longitude]);
+    });
+  }, []);
 
   useEffect(() => {
     api.get('items').then(response => {
@@ -63,6 +74,20 @@ const CollectionPoints = () => {
   function handleSelectCity(event: ChangeEvent<HTMLSelectElement>) {
     const city = event.target.value;
     setSelectedCity(city);
+  }
+
+  function LocationMarker() {
+    useMapEvents({
+      click(event: LeafletMouseEvent) {
+        console.log([event.latlng.lat, event.latlng.lng]);
+        setSelectedPosition([event.latlng.lat, event.latlng.lng]);
+      }
+    });
+    return selectedPosition === null ? null : (
+      <Marker position={selectedPosition}>
+        <Popup>Você está aqui!</Popup>
+      </Marker>
+    );
   }
 
   return (
@@ -107,16 +132,12 @@ const CollectionPoints = () => {
             <span>Selecione o endereço no mapa.</span>
           </header>
 
-          <MapContainer center={[-27.2092052, -49.6401092]} zoom={15} scrollWheelZoom={false}>
+          <MapContainer center={initialPosition} zoom={15} scrollWheelZoom={false}>
             <TileLayer
               attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-            <Marker position={[-27.2092052, -49.6401092]}>
-              <Popup>
-                Um ponto no mapa.
-              </Popup>
-            </Marker>
+            <LocationMarker />
           </MapContainer>
 
           <div className="field-group">
