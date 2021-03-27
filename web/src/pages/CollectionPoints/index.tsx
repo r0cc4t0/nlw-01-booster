@@ -42,7 +42,6 @@ const CollectionPoints = () => {
     navigator.geolocation.getCurrentPosition(position => {
       const { latitude, longitude } = position.coords;
       setInitialPosition([latitude, longitude]);
-      setSelectedPosition([latitude, longitude]);
     });
   }, []);
 
@@ -93,18 +92,6 @@ const CollectionPoints = () => {
       <Marker position={selectedPosition}>
         <Popup>Você está aqui!</Popup>
       </Marker>
-    );
-  }
-
-  function Map() {
-    return (
-      <MapContainer center={initialPosition} zoom={15} scrollWheelZoom={false}>
-        <TileLayer
-          attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        <LocationMarker />
-      </MapContainer>
     );
   }
 
@@ -194,7 +181,15 @@ const CollectionPoints = () => {
             <span>Selecione o endereço no mapa.</span>
           </header>
 
-          <Map />
+          {initialPosition[0] !== 0 && initialPosition[1] !== 0 && (
+            <MapContainer center={initialPosition} zoom={15} scrollWheelZoom={false}>
+              <TileLayer
+                attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              <LocationMarker />
+            </MapContainer>
+          )}
 
           <div className="field-group">
             <div className="field">
